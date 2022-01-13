@@ -1,0 +1,37 @@
+#quiz plans
+ if message.content.startswith('&quiz'):
+       channel = message.channel
+       await channel.send('Send me that 👍 reaction, mate')
+
+       def check(reaction, user):
+           return user == message.author and str(reaction.emoji) == '👍'
+
+       try:
+           reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+       except asyncio.TimeoutError:
+           await channel.send('👎')
+       else:
+           await channel.send('👍')    
+
+#custom help cmd
+class Help(commands.HelpCommand):
+  def __init__(self):
+      super().__init__()
+
+  async def send_bot_help(self, mapping):
+    for cog in mapping:
+      await self.get_destination().send(f'{cog.qualified_name}: {[command.name for command in mapping[cog]]}')
+
+  async def send_cog_help(self, cog):
+      await self.get_destination().send(f'{cog.qualified_name}: {[command.name for command in cog.get_command()]}')
+
+  async def send_group_help(self, group):
+      await self.get_destination().send(f'{group.name}: {[command.name for index, command in enumerate(group.commands)]}')
+          
+  async def send_command_help(self, command):
+      await self.get_destination().send(command.name)
+
+#cogging (continuation of above)
+for filename in os.listdir('./cogs'):
+  if filename.endswith('.py'):
+    bot.load_extension(f'cogs.{filename[:-3]}')
